@@ -1,0 +1,797 @@
+<title>Mobile Systems Blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF2F6; --bg-grid:rgba(16,36,62,.07); --surface:#FFFFFF; --surface-2:#F5F9FB;
+  --ink:#10243E; --ink-dim:#4E6580; --accent:#C4551A; --accent-soft:#C4551A1f; --accent2:#1B6E76; --accent2-soft:#1B6E761a;
+  --line:rgba(16,36,62,.18); --line-strong:rgba(16,36,62,.36); --good:#2E7D4F; --shadow:rgba(16,36,62,.14);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0A2240; --bg-grid:rgba(232,241,250,.055); --surface:#0E2C4E; --surface-2:#123561;
+    --ink:#EAF2FA; --ink-dim:#9FB7CE; --accent:#FF9552; --accent-soft:#FF95522b; --accent2:#6FE0D2; --accent2-soft:#6FE0D21f;
+    --line:rgba(232,241,250,.16); --line-strong:rgba(232,241,250,.32); --good:#6FD79A; --shadow:rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0A2240; --bg-grid:rgba(232,241,250,.055); --surface:#0E2C4E; --surface-2:#123561;
+  --ink:#EAF2FA; --ink-dim:#9FB7CE; --accent:#FF9552; --accent-soft:#FF95522b; --accent2:#6FE0D2; --accent2-soft:#6FE0D21f;
+  --line:rgba(232,241,250,.16); --line-strong:rgba(232,241,250,.32); --good:#6FD79A; --shadow:rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    repeating-linear-gradient(0deg, var(--bg-grid) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(90deg, var(--bg-grid) 0 1px, transparent 1px 28px),
+    var(--bg);
+  color:var(--ink);
+  font-family:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{ background:var(--accent-soft); color:var(--ink); }
+a{ color:var(--accent2); }
+h1,h2,h3{ font-family:'IBM Plex Sans Condensed', ui-sans-serif, sans-serif; font-weight:700; text-wrap:balance; margin:0; }
+.mono{ font-family:'IBM Plex Mono', ui-monospace, monospace; }
+.eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:.72rem; letter-spacing:.11em; text-transform:uppercase; color:var(--accent); font-weight:600; }
+p{ line-height:1.6; color:var(--ink); max-width:62ch; }
+.dim{ color:var(--ink-dim); }
+
+/* ---------- shell ---------- */
+.sheet-root{ max-width:1180px; margin:0 auto; padding:22px 20px 80px; }
+
+/* title block, drafting-table style */
+.titleblock{
+  border:1.5px solid var(--line-strong);
+  background:var(--surface);
+  box-shadow:0 1px 0 var(--shadow);
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:stretch;
+  margin-bottom:22px;
+}
+.tb-mark{ display:flex; align-items:center; justify-content:center; padding:0 22px; border-right:1.5px solid var(--line-strong); }
+.tb-mark svg{ width:52px; height:52px; }
+.tb-main{ padding:16px 22px; display:flex; flex-direction:column; gap:4px; justify-content:center; }
+.tb-main h1{ font-size:1.65rem; letter-spacing:.01em; }
+.tb-main .sub{ color:var(--ink-dim); font-size:.92rem; max-width:56ch; }
+.tb-meta{ border-left:1.5px solid var(--line-strong); display:grid; grid-template-rows:repeat(3,1fr); font-family:'IBM Plex Mono',monospace; font-size:.68rem; }
+.tb-meta div{ padding:6px 14px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; justify-content:center; gap:2px; min-width:132px; }
+.tb-meta div:last-child{ border-bottom:none; }
+.tb-meta .k{ color:var(--ink-dim); letter-spacing:.08em; text-transform:uppercase; font-size:.62rem; }
+.tb-meta .v{ color:var(--ink); font-weight:500; }
+
+/* layout: index + sheets */
+.layout{ display:grid; grid-template-columns:190px 1fr; gap:20px; align-items:start; }
+@media (max-width:860px){ .layout{ grid-template-columns:1fr; } }
+
+nav.index{
+  position:sticky; top:16px; display:flex; flex-direction:column; gap:2px;
+  border:1.5px solid var(--line-strong); background:var(--surface); padding:10px;
+}
+@media (max-width:860px){
+  nav.index{ position:static; flex-direction:row; overflow-x:auto; gap:6px; padding:10px; }
+}
+nav.index button{
+  all:unset; cursor:pointer; display:flex; align-items:baseline; gap:8px;
+  padding:7px 8px; font-family:'IBM Plex Mono',monospace; font-size:.74rem; color:var(--ink-dim);
+  border-left:2px solid transparent; white-space:nowrap;
+}
+nav.index button .code{ color:var(--accent); font-weight:600; }
+nav.index button.active{ color:var(--ink); border-left-color:var(--accent); background:var(--accent-soft); }
+nav.index button .stamp{ margin-left:auto; opacity:0; color:var(--good); font-weight:700; }
+nav.index button.done .stamp{ opacity:1; }
+nav.index .idx-title{ font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.1em; color:var(--ink-dim); text-transform:uppercase; padding:4px 8px 8px; }
+
+main.sheets{ display:flex; flex-direction:column; gap:22px; min-width:0; }
+
+.sheet{
+  border:1.5px solid var(--line-strong); background:var(--surface);
+  padding:24px 26px 26px; position:relative; scroll-margin-top:16px;
+}
+.sheet::before, .sheet::after{
+  content:""; position:absolute; width:14px; height:14px; border:1.5px solid var(--line-strong);
+  top:-1.5px; left:-1.5px; border-right:none; border-bottom:none;
+}
+.sheet::after{ top:auto; left:auto; bottom:-1.5px; right:-1.5px; border-left:none; border-top:none; }
+.sheet-head{ display:flex; align-items:baseline; gap:12px; margin-bottom:6px; flex-wrap:wrap; }
+.sheet-head .code{ font-family:'IBM Plex Mono',monospace; color:var(--accent); font-weight:600; font-size:.85rem; }
+.sheet-head h2{ font-size:1.36rem; }
+.sheet-tag{ margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:.66rem; color:var(--ink-dim); border:1px solid var(--line); padding:3px 8px; letter-spacing:.06em; text-transform:uppercase; }
+.sheet-intro{ margin-bottom:16px; }
+
+.diagram-wrap{ border:1px dashed var(--line-strong); background:var(--surface-2); padding:14px 16px 8px; margin:14px 0 18px; }
+.diagram-wrap .cap{ font-family:'IBM Plex Mono',monospace; font-size:.64rem; color:var(--ink-dim); letter-spacing:.08em; text-transform:uppercase; margin-top:6px; text-align:right; }
+svg.diagram{ width:100%; height:auto; display:block; overflow:visible; }
+.diagram .node{ fill:var(--surface); stroke:var(--ink); stroke-width:1.4; }
+.diagram .node-accent{ fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.4; }
+.diagram .node-teal{ fill:var(--accent2-soft); stroke:var(--accent2); stroke-width:1.4; }
+.diagram .edge{ stroke:var(--ink-dim); stroke-width:1.3; stroke-dasharray:4 3; fill:none; marker-end:url(#arrowhead); }
+.diagram .edge-accent{ stroke:var(--accent); marker-end:url(#arrowhead-accent); }
+.diagram .edge-solid{ stroke-dasharray:none; }
+.diagram text{ font-family:'IBM Plex Mono',monospace; fill:var(--ink); }
+.diagram text.lbl{ font-size:10.5px; letter-spacing:.02em; text-transform:uppercase; font-weight:600; }
+.diagram text.sub{ font-size:8.6px; fill:var(--ink-dim); text-transform:none; letter-spacing:0; font-weight:400; }
+.diagram .pin{ fill:var(--accent2); }
+
+.notes{ display:grid; grid-template-columns:1fr 1fr; gap:10px 22px; margin:16px 0; }
+@media (max-width:640px){ .notes{ grid-template-columns:1fr; } }
+.notes div{ border-left:2px solid var(--line-strong); padding:2px 0 2px 12px; }
+.notes .k{ font-family:'IBM Plex Mono',monospace; font-size:.66rem; color:var(--accent); letter-spacing:.06em; text-transform:uppercase; display:block; margin-bottom:2px; }
+.notes p{ margin:0; font-size:.9rem; }
+
+details.spec{ border:1px solid var(--line); margin-top:10px; }
+details.spec summary{ cursor:pointer; list-style:none; padding:10px 14px; font-family:'IBM Plex Mono',monospace; font-size:.75rem; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-dim); display:flex; align-items:center; gap:8px; }
+details.spec summary::before{ content:"+"; color:var(--accent); font-weight:700; width:1em; }
+details.spec[open] summary::before{ content:"–"; }
+details.spec .body{ padding:0 16px 14px; }
+details.spec .body ul{ margin:6px 0; padding-left:1.1em; }
+details.spec .body li{ margin:5px 0; font-size:.9rem; line-height:1.55; }
+
+/* quiz */
+.quiz-dock{ position:fixed; right:20px; bottom:20px; z-index:40; display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+.quiz-fab{ all:unset; cursor:pointer; display:flex; align-items:center; gap:10px; background:var(--ink); color:var(--bg); padding:12px 16px; border:1.5px solid var(--ink); box-shadow:0 6px 18px var(--shadow); font-family:'IBM Plex Mono',monospace; font-size:.78rem; letter-spacing:.05em; text-transform:uppercase; font-weight:600; }
+.quiz-fab .ring{ width:22px; height:22px; border-radius:50%; border:2.5px solid var(--accent); border-top-color:transparent; display:inline-block; }
+.quiz-panel{ width:min(380px, 88vw); border:1.5px solid var(--line-strong); background:var(--surface); box-shadow:0 14px 34px var(--shadow); display:none; flex-direction:column; }
+.quiz-panel.open{ display:flex; }
+.quiz-top{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--line); }
+.quiz-top .t{ font-family:'IBM Plex Mono',monospace; font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-dim); }
+.quiz-top button.close{ all:unset; cursor:pointer; color:var(--ink-dim); font-family:'IBM Plex Mono',monospace; padding:2px 6px; }
+.quiz-body{ padding:16px; display:flex; flex-direction:column; gap:12px; }
+.card{ min-height:150px; border:1px solid var(--line-strong); background:var(--surface-2); padding:16px; display:flex; flex-direction:column; cursor:pointer; position:relative; }
+.card .kicker{ font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+.card .txt{ font-size:.98rem; line-height:1.5; flex:1; }
+.card .flip-hint{ font-family:'IBM Plex Mono',monospace; font-size:.62rem; color:var(--ink-dim); text-align:right; letter-spacing:.05em; text-transform:uppercase; }
+.quiz-actions{ display:flex; gap:8px; }
+.quiz-actions button{ all:unset; cursor:pointer; flex:1; text-align:center; padding:9px 10px; font-family:'IBM Plex Mono',monospace; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; border:1.4px solid var(--line-strong); }
+.quiz-actions button.again{ color:var(--ink-dim); }
+.quiz-actions button.got-it{ color:var(--good); border-color:var(--good); }
+.quiz-progress{ height:6px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden; }
+.quiz-progress i{ display:block; height:100%; background:var(--accent); width:0%; transition:width .25s; }
+.quiz-stats{ font-family:'IBM Plex Mono',monospace; font-size:.68rem; color:var(--ink-dim); display:flex; justify-content:space-between; }
+.quiz-done{ text-align:center; padding:20px 6px; }
+.quiz-done .big{ font-family:'IBM Plex Sans Condensed',sans-serif; font-weight:700; font-size:1.6rem; }
+
+footer{ margin-top:30px; padding-top:18px; border-top:1px solid var(--line); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--ink-dim); }
+footer a{ color:var(--ink-dim); text-decoration:underline; }
+
+@media (prefers-reduced-motion: reduce){ *{ transition:none !important; animation:none !important; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-dim)"></path>
+    </marker>
+    <marker id="arrowhead-accent" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path>
+    </marker>
+  </defs>
+</svg>
+
+<div class="sheet-root">
+
+  <header class="titleblock">
+    <div class="tb-mark">
+      <svg viewBox="0 0 52 52" fill="none">
+        <circle cx="26" cy="26" r="23" stroke="var(--ink)" stroke-width="1.4"></circle>
+        <circle cx="26" cy="26" r="2.4" fill="var(--accent)"></circle>
+        <path d="M26 3 V49 M3 26 H49" stroke="var(--ink)" stroke-width="1" opacity=".5"></path>
+        <path d="M26 3 L29 10 L23 10 Z" fill="var(--ink)"></path>
+      </svg>
+    </div>
+    <div class="tb-main">
+      <span class="eyebrow">Field manual · unofficial</span>
+      <h1>Mobile Systems Blueprint</h1>
+      <div class="sub">An interactive drafting table for mobile system design — caching, sync, media pipelines and the interview framework, distilled from <a href="https://github.com/yogeshpaliyal/awesome-mobile-system-design" target="_blank" rel="noopener">awesome&#8209;mobile&#8209;system&#8209;design</a>.</div>
+    </div>
+    <div class="tb-meta">
+      <div><span class="k">Sheets</span><span class="v">A0 – A7</span></div>
+      <div><span class="k">Scale</span><span class="v">Interview‑ready</span></div>
+      <div><span class="k">Rev</span><span class="v" id="revDate">—</span></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="index" id="indexNav">
+      <div class="idx-title">Sheet Index</div>
+      <button data-target="s0"><span class="code">A0</span> Approach <span class="stamp">✓</span></button>
+      <button data-target="s1"><span class="code">A1</span> Caching <span class="stamp">✓</span></button>
+      <button data-target="s2"><span class="code">A2</span> Sync &amp; Network <span class="stamp">✓</span></button>
+      <button data-target="s3"><span class="code">A3</span> Image Pipeline <span class="stamp">✓</span></button>
+      <button data-target="s4"><span class="code">A4</span> File Downloader <span class="stamp">✓</span></button>
+      <button data-target="s5"><span class="code">A5</span> Chat System <span class="stamp">✓</span></button>
+      <button data-target="s6"><span class="code">A6</span> Stories <span class="stamp">✓</span></button>
+      <button data-target="s7"><span class="code">A7</span> Field Cases <span class="stamp">✓</span></button>
+      <button data-target="quiz"><span class="code">Q</span> Quiz Mode</button>
+    </nav>
+
+    <main class="sheets">
+
+      <!-- A0 APPROACH -->
+      <section class="sheet" id="s0" data-code="A0">
+        <div class="sheet-head"><span class="code">A0</span><h2>How to approach the room</h2><span class="sheet-tag">Framework</span></div>
+        <p class="sheet-intro dim">Every mobile system design question — chat app, image loader, downloader — collapses into the same four-beat structure. Learn the beats once, reuse them everywhere.</p>
+
+        <div class="diagram-wrap">
+          <svg class="diagram" viewBox="0 0 640 130">
+            <g>
+              <rect class="node" x="10" y="45" width="130" height="46" rx="2"></rect>
+              <text class="lbl" x="75" y="64" text-anchor="middle">Requirements</text>
+              <text class="sub" x="75" y="78" text-anchor="middle">functional / non‑functional</text>
+
+              <rect class="node-accent" x="175" y="45" width="150" height="46" rx="2"></rect>
+              <text class="lbl" x="250" y="64" text-anchor="middle">High‑level design</text>
+              <text class="sub" x="250" y="78" text-anchor="middle">layers &amp; data flow</text>
+
+              <rect class="node" x="360" y="45" width="130" height="46" rx="2"></rect>
+              <text class="lbl" x="425" y="64" text-anchor="middle">Deep dive</text>
+              <text class="sub" x="425" y="78" text-anchor="middle">2–3 chosen components</text>
+
+              <rect class="node-teal" x="525" y="45" width="105" height="46" rx="2"></rect>
+              <text class="lbl" x="577" y="64" text-anchor="middle">Wrap‑up</text>
+              <text class="sub" x="577" y="78" text-anchor="middle">trade‑offs</text>
+
+              <path class="edge" d="M140 68 H172"></path>
+              <path class="edge" d="M325 68 H357"></path>
+              <path class="edge" d="M490 68 H522"></path>
+            </g>
+          </svg>
+          <div class="cap">Fig. A0.1 — interview flow, left to right</div>
+        </div>
+
+        <div class="notes">
+          <div><span class="k">Clarify first</span><p>Ask about scale, offline behavior, target platforms and battery/data budgets before drawing a single box.</p></div>
+          <div><span class="k">Mobile ≠ server</span><p>Battery, flaky networks, background‑execution limits and finite storage are constraints server design rarely faces.</p></div>
+        </div>
+
+        <details class="spec">
+          <summary>Interviewer signals to watch for</summary>
+          <div class="body"><ul>
+            <li>They keep steering toward one component — that's your deep‑dive cue, stop broadening the design.</li>
+            <li>Silence after your high‑level diagram usually means "go deeper," not "you're done."</li>
+            <li>Always state a trade‑off out loud (e.g. "cache‑aside is simpler but risks stale reads") — the reasoning is graded, not just the box diagram.</li>
+          </ul></div>
+        </details>
+      </section>
+
+      <!-- A1 CACHING -->
+      <section class="sheet" id="s1" data-code="A1">
+        <div class="sheet-head"><span class="code">A1</span><h2>Caching</h2><span class="sheet-tag">Building block</span></div>
+        <p class="sheet-intro dim">The most-reused building block in mobile design: a fast, unreliable memory tier in front of a slower, durable disk tier, in front of the network.</p>
+
+        <div class="diagram-wrap">
+          <svg class="diagram" viewBox="0 0 640 190">
+            <rect class="node-accent" x="255" y="8" width="130" height="38" rx="2"></rect>
+            <text class="lbl" x="320" y="31" text-anchor="middle">Repository</text>
+
+            <rect class="node" x="60" y="80" width="150" height="42" rx="2"></rect>
+            <text class="lbl" x="135" y="101" text-anchor="middle">Memory cache</text>
+            <text class="sub" x="135" y="114" text-anchor="middle">LRU, volatile</text>
+
+            <rect class="node" x="255" y="80" width="130" height="42" rx="2"></rect>
+            <text class="lbl" x="320" y="101" text-anchor="middle">Disk cache</text>
+            <text class="sub" x="320" y="114" text-anchor="middle">SQLite / files</text>
+
+            <rect class="node-teal" x="430" y="80" width="150" height="42" rx="2"></rect>
+            <text class="lbl" x="505" y="101" text-anchor="middle">Network</text>
+            <text class="sub" x="505" y="114" text-anchor="middle">source of truth</text>
+
+            <path class="edge" d="M300 46 C260 58, 180 66, 150 78"></path>
+            <path class="edge" d="M320 46 V78"></path>
+            <path class="edge" d="M340 46 C380 58, 460 66, 490 78"></path>
+
+            <path class="edge-accent" d="M210 101 H253"></path>
+            <path class="edge-accent" d="M385 101 H428"></path>
+
+            <text class="sub" x="135" y="150" text-anchor="middle">evict on OS memory</text>
+            <text class="sub" x="135" y="162" text-anchor="middle">pressure signal</text>
+            <circle class="pin" cx="135" cy="122" r="2.6"></circle>
+            <path class="edge" d="M135 124 V138"></path>
+          </svg>
+          <div class="cap">Fig. A1.1 — read path checks memory → disk → network, populating on the way back</div>
+        </div>
+
+        <div class="notes">
+          <div><span class="k">Eviction</span><p>LRU drops the item unused longest; LFU drops the item used least often. Pair with a TTL or size cap.</p></div>
+          <div><span class="k">Write strategy</span><p>Cache‑aside (app manages both) is the default; write‑through trades latency for consistency.</p></div>
+        </div>
+
+        <details class="spec">
+          <summary>Mobile‑specific gotchas</summary>
+          <div class="body"><ul>
+            <li>Respond to <span class="mono">onTrimMemory</span> / memory‑warning callbacks — a cache that ignores them gets the whole process killed.</li>
+            <li>Disk cache needs a hard size cap; mobile storage is finite and shared with the rest of the OS.</li>
+            <li>Cross‑process apps (widgets, share extensions) need the disk tier to be the shared truth — memory caches don't cross process boundaries.</li>
+          </ul></div>
+        </details>
+      </section>
+
+      <!-- A2 SYNC & NETWORK -->
+      <section class="sheet" id="s2" data-code="A2">
+        <div class="sheet-head"><span class="code">A2</span><h2>Sync &amp; networking</h2><span class="sheet-tag">Building block</span></div>
+        <p class="sheet-intro dim">Offline‑first apps write locally first and treat the network as an eventually‑consistent background job, not a blocking dependency.</p>
+
+        <div class="diagram-wrap">
+          <svg class="diagram" viewBox="0 0 640 170">
+            <rect class="node-accent" x="10" y="60" width="120" height="44" rx="2"></rect>
+            <text class="lbl" x="70" y="80" text-anchor="middle">Local DB</text>
+            <text class="sub" x="70" y="93" text-anchor="middle">optimistic write</text>
+
+            <rect class="node" x="180" y="60" width="130" height="44" rx="2"></rect>
+            <text class="lbl" x="245" y="80" text-anchor="middle">Outbox queue</text>
+            <text class="sub" x="245" y="93" text-anchor="middle">pending ops</text>
+
+            <rect class="node" x="360" y="60" width="130" height="44" rx="2"></rect>
+            <text class="lbl" x="425" y="80" text-anchor="middle">Sync engine</text>
+            <text class="sub" x="425" y="93" text-anchor="middle">backoff + retry</text>
+
+            <rect class="node-teal" x="540" y="60" width="90" height="44" rx="2"></rect>
+            <text class="lbl" x="585" y="80" text-anchor="middle">Server</text>
+
+            <path class="edge edge-solid" d="M130 82 H178"></path>
+            <path class="edge" d="M310 82 H358"></path>
+            <path class="edge edge-solid" d="M490 76 H538"></path>
+            <path class="edge edge-solid" d="M538 92 H490" marker-end="url(#arrowhead)"></path>
+            <text class="sub" x="514" y="70" text-anchor="middle">push</text>
+            <text class="sub" x="514" y="106" text-anchor="middle">ack / conflict</text>
+
+            <path class="edge" d="M425 58 C425 30, 245 30, 245 58" marker-end="url(#arrowhead)"></path>
+            <text class="sub" x="335" y="24" text-anchor="middle">only when connectivity restored</text>
+          </svg>
+          <div class="cap">Fig. A2.1 — write-local, sync-later, with a gated retry loop</div>
+        </div>
+
+        <div class="notes">
+          <div><span class="k">Backoff</span><p>Exponential backoff plus jitter stops every client retrying in lockstep and hammering a recovering server.</p></div>
+          <div><span class="k">Conflicts</span><p>Last‑write‑wins is the simple interview answer; CRDTs or vector clocks preserve intent for collaborative data.</p></div>
+        </div>
+
+        <details class="spec">
+          <summary>Battery-aware scheduling</summary>
+          <div class="body"><ul>
+            <li>Batch outbox items into one request instead of one round‑trip per change — radio wake‑ups are the real battery cost, not bytes.</li>
+            <li>Defer non‑urgent sync to platform schedulers (WorkManager, BGTaskScheduler) so the OS can coalesce it with other apps' network activity.</li>
+            <li>Prefer cursor‑based pagination over offset — stable under concurrent writes and cheaper to resume after a dropped connection.</li>
+          </ul></div>
+        </details>
+      </section>
+
+      <!-- A3 IMAGE PIPELINE -->
+      <section class="sheet" id="s3" data-code="A3">
+        <div class="sheet-head"><span class="code">A3</span><h2>Image loading pipeline</h2><span class="sheet-tag">Building block</span></div>
+        <p class="sheet-intro dim">The Glide / Coil / SDWebImage shape: a request keyed by URL and target size, resolved through caches before ever touching the network.</p>
+
+        <div class="diagram-wrap">
+          <svg class="diagram" viewBox="0 0 640 150">
+            <rect class="node-accent" x="6" y="52" width="100" height="42" rx="2"></rect>
+            <text class="lbl" x="56" y="73" text-anchor="middle">Request</text>
+            <text class="sub" x="56" y="85" text-anchor="middle">url + size</text>
+
+            <rect class="node" x="140" y="52" width="100" height="42" rx="2"></rect>
+            <text class="lbl" x="190" y="73" text-anchor="middle">Mem cache</text>
+
+            <rect class="node" x="274" y="52" width="100" height="42" rx="2"></rect>
+            <text class="lbl" x="324" y="73" text-anchor="middle">Disk cache</text>
+
+            <rect class="node-teal" x="408" y="52" width="100" height="42" rx="2"></rect>
+            <text class="lbl" x="458" y="73" text-anchor="middle">Network</text>
+
+            <rect class="node" x="542" y="52" width="92" height="42" rx="2"></rect>
+            <text class="lbl" x="588" y="69" text-anchor="middle">Decode</text>
+            <text class="sub" x="588" y="82" text-anchor="middle">&amp; downsample</text>
+
+            <path class="edge" d="M106 73 H138"></path>
+            <path class="edge" d="M240 73 H272"></path>
+            <path class="edge" d="M374 73 H406"></path>
+            <path class="edge" d="M508 73 H540"></path>
+
+            <path class="edge-accent" d="M588 52 C588 20, 190 20, 190 50" marker-end="url(#arrowhead-accent)"></path>
+            <text class="sub" x="390" y="16" text-anchor="middle">store into caches, then render</text>
+          </svg>
+          <div class="cap">Fig. A3.1 — miss cascades right, hit short-circuits and renders immediately</div>
+        </div>
+
+        <div class="notes">
+          <div><span class="k">Downsample</span><p>Decode to the target view's pixel size, never full resolution — the #1 cause of list‑scrolling OOM crashes.</p></div>
+          <div><span class="k">Cancellation</span><p>Tag each request with its view; when a row is recycled, cancel or ignore the stale callback so the wrong image never lands.</p></div>
+        </div>
+
+        <details class="spec">
+          <summary>Extras interviewers like to hear</summary>
+          <div class="body"><ul>
+            <li>Bitmap pooling — reuse decoded buffers of the same size instead of allocating fresh ones per scroll frame.</li>
+            <li>Priority: visible viewport first, prefetch just below the fold, cancel everything scrolled far out of view.</li>
+            <li>Placeholder → low‑res blur → full image gives a perceived‑performance win almost for free.</li>
+          </ul></div>
+        </details>
+      </section>
+
+      <!-- A4 FILE DOWNLOADER -->
+      <section class="sheet" id="s4" data-code="A4">
+        <div class="sheet-head"><span class="code">A4</span><h2>File downloader</h2><span class="sheet-tag">Building block</span></div>
+        <p class="sheet-intro dim">Large, resumable transfers that must survive app kills, network drops, and a user who backgrounds the app mid‑download.</p>
+
+        <div class="diagram-wrap">
+          <svg class="diagram" viewBox="0 0 640 160">
+            <rect class="node-accent" x="6" y="55" width="110" height="42" rx="2"></rect>
+            <text class="lbl" x="61" y="76" text-anchor="middle">Range request</text>
+            <text class="sub" x="61" y="88" text-anchor="middle">chunked, resumable</text>
+
+            <rect class="node" x="150" y="20" width="90" height="34" rx="2"></rect>
+            <text class="lbl" x="195" y="41" text-anchor="middle" style="font-size:9px">chunk 1</text>
+            <rect class="node" x="150" y="63" width="90" height="34" rx="2"></rect>
+            <text class="lbl" x="195" y="84" text-anchor="middle" style="font-size:9px">chunk 2</text>
+            <rect class="node" x="150" y="106" width="90" height="34" rx="2"></rect>
+            <text class="lbl" x="195" y="127" text-anchor="middle" style="font-size:9px">chunk n</text>
+
+            <rect class="node" x="300" y="55" width="100" height="42" rx="2"></rect>
+            <text class="lbl" x="350" y="76" text-anchor="middle">Temp file</text>
+
+            <rect class="node-teal" x="440" y="55" width="100" height="42" rx="2"></rect>
+            <text class="lbl" x="490" y="72" text-anchor="middle">Checksum</text>
+            <text class="sub" x="490" y="85" text-anchor="middle">verify</text>
+
+            <rect class="node-accent" x="560" y="55" width="72" height="42" rx="2"></rect>
+            <text class="lbl" x="596" y="72" text-anchor="middle" style="font-size:9px">Atomic</text>
+            <text class="lbl" x="596" y="85" text-anchor="middle" style="font-size:9px">rename</text>
+
+            <path class="edge" d="M116 37 H148"></path>
+            <path class="edge" d="M116 80 H148"></path>
+            <path class="edge" d="M116 123 H148"></path>
+            <path class="edge" d="M240 37 C270 37, 270 65, 298 65"></path>
+            <path class="edge" d="M240 80 H298"></path>
+            <path class="edge" d="M240 123 C270 123, 270 95, 298 95"></path>
+            <path class="edge" d="M400 76 H438"></path>
+            <path class="edge" d="M540 76 H558"></path>
+          </svg>
+          <div class="cap">Fig. A4.1 — parallel ranged chunks merge into one verified, atomically-placed file</div>
+        </div>
+
+        <div class="notes">
+          <div><span class="k">Resume</span><p>Persist bytes‑received per chunk locally so a relaunch resumes with <span class="mono">Range</span> headers instead of restarting.</p></div>
+          <div><span class="k">Atomic finish</span><p>Write to a temp path, verify, then rename — a crash mid‑write never leaves a corrupt file at the final path.</p></div>
+        </div>
+
+        <details class="spec">
+          <summary>Platform mechanics</summary>
+          <div class="body"><ul>
+            <li>Hand the transfer to a background transfer service (WorkManager, <span class="mono">URLSession</span> background config) so it survives app suspension.</li>
+            <li>Cap concurrent chunk downloads — more parallelism helps only up to the link's actual bandwidth‑delay product.</li>
+            <li>Surface pause / resume / retry as first‑class states in local storage, not just in‑memory flags.</li>
+          </ul></div>
+        </details>
+      </section>
+
+      <!-- A5 CHAT SYSTEM -->
+      <section class="sheet" id="s5" data-code="A5">
+        <div class="sheet-head"><span class="code">A5</span><h2>Chat application</h2><span class="sheet-tag">Feature case</span></div>
+        <p class="sheet-intro dim">A messaging client is caching, sync and offline-first patterns combined, plus a persistent connection and delivery-state tracking.</p>
+
+        <div class="diagram-wrap">
+          <svg class="diagram" viewBox="0 0 640 170">
+            <rect class="node-accent" x="6" y="66" width="110" height="42" rx="2"></rect>
+            <text class="lbl" x="61" y="87" text-anchor="middle">Client A</text>
+            <text class="sub" x="61" y="99" text-anchor="middle">optimistic UI</text>
+
+            <rect class="node" x="180" y="66" width="110" height="42" rx="2"></rect>
+            <text class="lbl" x="235" y="87" text-anchor="middle">Socket</text>
+            <text class="sub" x="235" y="99" text-anchor="middle">persistent conn.</text>
+
+            <rect class="node-teal" x="350" y="66" width="110" height="42" rx="2"></rect>
+            <text class="lbl" x="405" y="87" text-anchor="middle">Server</text>
+
+            <rect class="node" x="524" y="66" width="110" height="42" rx="2"></rect>
+            <text class="lbl" x="579" y="87" text-anchor="middle">Client B</text>
+
+            <path class="edge edge-solid" d="M116 87 H178"></path>
+            <path class="edge edge-solid" d="M290 87 H348"></path>
+            <path class="edge edge-solid" d="M460 87 H522"></path>
+
+            <path class="edge-accent" d="M405 64 C405 20, 61 20, 61 64" marker-end="url(#arrowhead-accent)"></path>
+            <text class="sub" x="233" y="16" text-anchor="middle">ack chain → sending · sent · delivered · read</text>
+
+            <path class="edge" d="M460 108 C500 130, 540 130, 570 110" marker-end="url(#arrowhead)"></path>
+            <text class="sub" x="530" y="146" text-anchor="middle">push notification if B is backgrounded</text>
+          </svg>
+          <div class="cap">Fig. A5.1 — write local → send over socket → ack propagates delivery state back</div>
+        </div>
+
+        <div class="notes">
+          <div><span class="k">Local‑first</span><p>Message gets a client‑generated UUID and lands in the local DB instantly — the UI never waits on the network.</p></div>
+          <div><span class="k">Fallback path</span><p>OS‑level push (FCM/APNs) wakes a backgrounded recipient once the socket is suspended by the platform.</p></div>
+        </div>
+
+        <details class="spec">
+          <summary>Deep-dive topics interviewers reach for</summary>
+          <div class="body"><ul>
+            <li>Media messages: send a thumbnail inline, queue the full asset through the file‑downloader pattern from A4.</li>
+            <li>End‑to‑end encryption (Signal‑protocol shape) — mention key exchange and that the server only ever relays ciphertext.</li>
+            <li>Local full‑text search index over message history, since the server can't search what it can't read.</li>
+            <li>Pagination of history: cursor‑based, fetched backwards from "now," cached to disk per conversation.</li>
+          </ul></div>
+        </details>
+      </section>
+
+      <!-- A6 STORIES -->
+      <section class="sheet" id="s6" data-code="A6">
+        <div class="sheet-head"><span class="code">A6</span><h2>Stories (Instagram-style)</h2><span class="sheet-tag">Feature case</span></div>
+        <p class="sheet-intro dim">Short-lived, ordered, media-heavy content — the interesting problems are prefetch timing and expiry, not the data model.</p>
+
+        <div class="diagram-wrap">
+          <svg class="diagram" viewBox="0 0 640 150">
+            <rect class="node-accent" x="10" y="50" width="150" height="46" rx="2"></rect>
+            <text class="lbl" x="85" y="70" text-anchor="middle">Current story</text>
+            <text class="sub" x="85" y="83" text-anchor="middle">playing now</text>
+
+            <rect class="node" x="210" y="50" width="150" height="46" rx="2"></rect>
+            <text class="lbl" x="285" y="70" text-anchor="middle">Next story</text>
+            <text class="sub" x="285" y="83" text-anchor="middle">prefetching media</text>
+
+            <rect class="node" x="410" y="50" width="150" height="46" rx="2"></rect>
+            <text class="lbl" x="485" y="70" text-anchor="middle">Next + 1</text>
+            <text class="sub" x="485" y="83" text-anchor="middle">queued</text>
+
+            <path class="edge-accent" d="M160 73 H208"></path>
+            <path class="edge" d="M360 73 H408"></path>
+
+            <text class="sub" x="85" y="115" text-anchor="middle">expires 24h after post</text>
+            <circle class="pin" cx="85" cy="96" r="2.6"></circle>
+            <path class="edge" d="M85 98 V104" marker-end="url(#arrowhead)"></path>
+          </svg>
+          <div class="cap">Fig. A6.1 — the viewer always stays one story ahead of the cache</div>
+        </div>
+
+        <div class="notes">
+          <div><span class="k">Prefetch window</span><p>Fetch story N+1's media during story N's playback so the tap‑next transition never shows a spinner.</p></div>
+          <div><span class="k">Expiry</span><p>A simple <span class="mono">expiresAt</span> field filters feeds and drives a background job that purges cached media past TTL.</p></div>
+        </div>
+
+        <details class="spec">
+          <summary>UI state machine &amp; telemetry</summary>
+          <div class="body"><ul>
+            <li>Each segment is its own progress‑bar timer: tap‑hold pauses it, release resumes, timeout auto‑advances.</li>
+            <li>"Seen" events are batched client‑side and flushed periodically — one network call per view would drain both battery and data.</li>
+            <li>Preload only images/short clips eagerly; long‑form video within a story streams instead.</li>
+          </ul></div>
+        </details>
+      </section>
+
+      <!-- A7 FIELD CASES -->
+      <section class="sheet" id="s7" data-code="A7">
+        <div class="sheet-head"><span class="code">A7</span><h2>Field cases: Facebook &amp; WhatsApp</h2><span class="sheet-tag">Real-world</span></div>
+        <p class="sheet-intro dim">Two production apps, two very different priorities — one optimized for feature velocity at massive scale, one optimized for privacy and offline resilience.</p>
+
+        <div class="diagram-wrap">
+          <svg class="diagram" viewBox="0 0 640 200">
+            <text class="lbl" x="10" y="18" style="font-size:10px">Facebook — modular, feed-first</text>
+            <rect class="node" x="10" y="28" width="110" height="38" rx="2"></rect>
+            <text class="lbl" x="65" y="51" text-anchor="middle" style="font-size:9px">Feature modules</text>
+            <rect class="node" x="150" y="28" width="110" height="38" rx="2"></rect>
+            <text class="lbl" x="205" y="51" text-anchor="middle" style="font-size:9px">DI container</text>
+            <rect class="node-accent" x="290" y="28" width="150" height="38" rx="2"></rect>
+            <text class="lbl" x="365" y="45" text-anchor="middle" style="font-size:9px">Feed: paginated</text>
+            <text class="sub" x="365" y="58" text-anchor="middle">+ virtualized list</text>
+            <path class="edge" d="M120 47 H148"></path>
+            <path class="edge" d="M260 47 H288"></path>
+
+            <line x1="0" y1="98" x2="640" y2="98" stroke="var(--line)" stroke-dasharray="2 4"></line>
+
+            <text class="lbl" x="10" y="120" style="font-size:10px">WhatsApp — local-first, privacy-first</text>
+            <rect class="node-teal" x="10" y="130" width="160" height="42" rx="2"></rect>
+            <text class="lbl" x="90" y="150" text-anchor="middle" style="font-size:9px">Phone local DB</text>
+            <text class="sub" x="90" y="163" text-anchor="middle">source of truth</text>
+            <rect class="node" x="235" y="130" width="170" height="42" rx="2"></rect>
+            <text class="lbl" x="320" y="150" text-anchor="middle" style="font-size:9px">E2E encrypted transport</text>
+            <text class="sub" x="320" y="163" text-anchor="middle">Signal protocol</text>
+            <rect class="node" x="470" y="130" width="150" height="42" rx="2"></rect>
+            <text class="lbl" x="545" y="150" text-anchor="middle" style="font-size:9px">Server: relay only</text>
+            <text class="sub" x="545" y="163" text-anchor="middle">no stored plaintext</text>
+            <path class="edge edge-solid" d="M170 151 H233"></path>
+            <path class="edge edge-solid" d="M405 151 H468"></path>
+          </svg>
+          <div class="cap">Fig. A7.1 — velocity architecture vs. minimal-trust architecture</div>
+        </div>
+
+        <div class="notes">
+          <div><span class="k">Facebook</span><p>Independent feature modules behind a shared DI container let teams ship and A/B‑test in parallel without one monolithic build.</p></div>
+          <div><span class="k">WhatsApp</span><p>The phone's database is canonical; the server is deliberately kept "dumb" so it has as little user data as possible to protect or leak.</p></div>
+        </div>
+
+        <details class="spec">
+          <summary>What to borrow from each in an interview</summary>
+          <div class="body"><ul>
+            <li>From Facebook: feed virtualization + prefetch-ahead pagination generalizes to any long scrolling list.</li>
+            <li>From WhatsApp: "client owns the truth, server relays" is a strong answer whenever privacy or offline resilience is emphasized.</li>
+            <li>Multi‑device sync (WhatsApp companion devices) is a good deep‑dive if the interviewer pushes on "what changes with two phones."</li>
+          </ul></div>
+        </details>
+      </section>
+
+      <!-- QUIZ -->
+      <section class="sheet quiz-sheet" id="quiz" data-code="Q">
+        <div class="sheet-head"><span class="code">Q</span><h2>Quiz mode</h2><span class="sheet-tag">Recall check</span></div>
+        <p class="sheet-intro dim">24 flashcards pulled from every sheet above. Flip each one, mark whether you had it, and your stamp count in the index fills in as you go.</p>
+        <button class="quiz-fab" id="startQuizInline" style="position:static; box-shadow:none;">
+          <span class="ring" id="ringInline"></span> Start review
+        </button>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>
+    <span>Drafted from <a href="https://github.com/yogeshpaliyal/awesome-mobile-system-design" target="_blank" rel="noopener">github.com/yogeshpaliyal/awesome-mobile-system-design</a></span>
+    <span id="progressLine">0 / 24 cards mastered</span>
+  </footer>
+</div>
+
+<div class="quiz-dock">
+  <div class="quiz-panel" id="quizPanel">
+    <div class="quiz-top">
+      <span class="t">Quiz mode</span>
+      <button class="close" id="closeQuiz">close ✕</button>
+    </div>
+    <div class="quiz-progress"><i id="quizBar"></i></div>
+    <div class="quiz-body" id="quizBody"></div>
+  </div>
+  <button class="quiz-fab" id="quizFab"><span class="ring" id="ringFab"></span> Quiz mode</button>
+</div>
+
+<script>
+(function(){
+  document.getElementById('revDate').textContent = new Date().toISOString().slice(0,10);
+
+  var sections = Array.prototype.slice.call(document.querySelectorAll('main.sheets > section'));
+  var navBtns = Array.prototype.slice.call(document.querySelectorAll('nav.index button'));
+
+  function storeGet(k, fallback){
+    try{ var v = localStorage.getItem(k); return v===null ? fallback : JSON.parse(v); }catch(e){ return fallback; }
+  }
+  function storeSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+  var visited = storeGet('msb_visited', {});
+  function markVisited(id){
+    if(!visited[id]){ visited[id] = true; storeSet('msb_visited', visited); }
+    var btn = navBtns.filter(function(b){ return b.dataset.target === id; })[0];
+    if(btn) btn.classList.add('done');
+  }
+  navBtns.forEach(function(b){ if(visited[b.dataset.target]) b.classList.add('done'); });
+
+  navBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var el = document.getElementById(btn.dataset.target);
+      if(el) el.scrollIntoView({behavior: 'smooth', block: 'start'});
+    });
+  });
+
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        var id = entry.target.id;
+        var btn = navBtns.filter(function(b){ return b.dataset.target === id; })[0];
+        if(entry.isIntersecting){
+          navBtns.forEach(function(b){ b.classList.remove('active'); });
+          if(btn) btn.classList.add('active');
+        }
+        if(entry.intersectionRatio > 0.55){ markVisited(id); }
+      });
+    }, { threshold: [0, 0.55], rootMargin: '-10% 0px -55% 0px' });
+    sections.forEach(function(s){ io.observe(s); });
+  }
+
+  var cards = [
+    ["A0","What are the two requirement types to clarify before designing?","Functional requirements (what the app must do) and non‑functional requirements (performance, offline support, scale, battery/data usage)."],
+    ["A0","What four-beat structure do most mobile system design interviews follow?","Requirements → high‑level design → deep dive → wrap‑up (trade‑offs & monitoring)."],
+    ["A0","Name three mobile-specific constraints rarely faced in server-side design.","Limited battery, unreliable/variable network, and restricted background execution (plus limited storage/memory)."],
+    ["A1","What's the difference between LRU and LFU eviction?","LRU evicts the item unused longest; LFU evicts the item used least often."],
+    ["A1","Why do mobile caches need both a memory and a disk tier?","Memory is fast but wiped on process death or low memory; disk survives restarts but is slower — combining both balances speed and persistence."],
+    ["A1","What should a cache do on a memory-pressure signal like onTrimMemory?","Proactively evict from the in‑memory cache to avoid the whole process being killed by the OS."],
+    ["A2","What does exponential backoff with jitter prevent?","A 'thundering herd' of retries all hitting the server at once right after an outage."],
+    ["A2","In an offline-first app, where does a new write land first?","The local database, immediately (optimistic write) — then it's queued to sync to the server."],
+    ["A2","Name a conflict-resolution strategy for edits made offline on two devices.","Last‑write‑wins (simple) or CRDTs/vector clocks (preserves more intent) — either is a solid interview answer."],
+    ["A3","Why decode/downsample an image to the target view size?","Full‑resolution bitmaps waste memory and can cause OOM crashes; downsampling matches decoded size to what's actually rendered."],
+    ["A3","What bug does list-row recycling cause in image loading, and how is it fixed?","A recycled row can receive an image meant for a different item; fix by tagging the request to its view and cancelling/ignoring stale callbacks."],
+    ["A3","What's the typical lookup order in an image loading pipeline?","Memory cache → disk cache → network fetch → decode/transform → store in caches → render."],
+    ["A4","What HTTP feature enables resumable downloads?","Range requests — Range / Content‑Range headers — to fetch a byte range instead of the whole file."],
+    ["A4","Why download to a temp file and rename on completion?","An atomic rename avoids leaving a corrupted or partial file at the final path if the download fails midway."],
+    ["A4","What lets a download keep going after the app is backgrounded or killed?","A platform background transfer service — e.g. WorkManager on Android, background URLSession on iOS."],
+    ["A5","What are the typical message delivery states in a chat UI?","Sending → sent → delivered → read."],
+    ["A5","Why use a persistent connection instead of polling for chat?","Lower latency and battery/data cost — the server pushes messages the instant they arrive instead of the client repeatedly asking."],
+    ["A5","What happens to real-time delivery when a chat app is backgrounded?","The persistent connection is usually suspended, so a push notification wakes the app or informs the user instead."],
+    ["A6","Why prefetch the next story's media while the current one is still playing?","So the tap‑next transition feels instant — the fetch happens during the current story's runtime instead of after."],
+    ["A6","What's a simple data-model rule for expiring a story?","Store a createdAt/expiresAt timestamp (~24h TTL), filter it from feeds, and purge its cached media after expiry."],
+    ["A6","How should 'seen' tracking be sent to the server?","Batched in the background rather than one network call per view, to protect battery and data."],
+    ["A7","What's WhatsApp's guiding architectural principle around user data?","Store as little as possible on the server — the phone's local database is the real source of truth, protected end‑to‑end."],
+    ["A7","Why do large consumer apps like Facebook split into feature modules?","Faster builds, independent team ownership, and the ability to ship or A/B‑test features independently."],
+    ["A7","Name a technique large feed apps use to keep scrolling smooth.","Row recycling with view virtualization, plus prefetching the next page before the user reaches the end."]
+  ];
+
+  var mastered = storeGet('msb_mastered', {});
+  function masteredCount(){ return Object.keys(mastered).filter(function(k){ return mastered[k]; }).length; }
+  function updateGlobalProgress(){
+    var n = masteredCount();
+    document.getElementById('progressLine').textContent = n + ' / ' + cards.length + ' cards mastered';
+    var pct = Math.round(100 * n / cards.length);
+    [document.getElementById('ringFab'), document.getElementById('ringInline')].forEach(function(r){
+      if(r) r.style.background = 'conic-gradient(var(--accent) ' + pct + '%, transparent ' + pct + '%)';
+    });
+  }
+  updateGlobalProgress();
+
+  var order = cards.map(function(_, i){ return i; }).filter(function(i){ return !mastered[i]; });
+  var pos = 0, flipped = false;
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var panel = document.getElementById('quizPanel');
+  var body = document.getElementById('quizBody');
+  var bar = document.getElementById('quizBar');
+
+  function openQuiz(){
+    order = cards.map(function(_, i){ return i; }).filter(function(i){ return !mastered[i]; });
+    pos = 0; flipped = false;
+    panel.classList.add('open');
+    render();
+  }
+  function closeQuiz(){ panel.classList.remove('open'); }
+
+  function render(){
+    var total = cards.length;
+    var doneN = masteredCount();
+    bar.style.width = Math.round(100*doneN/total) + '%';
+
+    if(order.length === 0){
+      body.innerHTML = '<div class="quiz-done"><div class="eyebrow">All clear</div>' +
+        '<div class="big">' + doneN + ' / ' + total + ' mastered</div>' +
+        '<p class="dim" style="margin:10px auto 14px;">Every card in the deck is marked mastered.</p>' +
+        '<div class="quiz-actions"><button class="again" id="resetDeck">Reset deck</button></div></div>';
+      document.getElementById('resetDeck').addEventListener('click', function(){
+        mastered = {}; storeSet('msb_mastered', mastered); updateGlobalProgress(); openQuiz();
+      });
+      return;
+    }
+
+    var idx = order[pos % order.length];
+    var c = cards[idx];
+    flipped = false;
+    body.innerHTML =
+      '<div class="quiz-stats"><span>' + c[0] + '</span><span>' + (doneN) + ' / ' + total + ' mastered</span></div>' +
+      '<div class="card" id="flipCard"><div class="kicker">Question</div><div class="txt" id="cardTxt">' + c[1] + '</div><div class="flip-hint">tap to reveal answer</div></div>' +
+      '<div class="quiz-actions"><button class="again" id="btnAgain">Review again</button><button class="got-it" id="btnGot">Got it ✓</button></div>';
+
+    var cardEl = document.getElementById('flipCard');
+    var txtEl = document.getElementById('cardTxt');
+    var kickerEl = cardEl.querySelector('.kicker');
+    var hintEl = cardEl.querySelector('.flip-hint');
+
+    cardEl.addEventListener('click', function(){
+      flipped = !flipped;
+      if(flipped){
+        kickerEl.textContent = 'Answer';
+        txtEl.textContent = c[2];
+        hintEl.textContent = 'tap to see question';
+      } else {
+        kickerEl.textContent = 'Question';
+        txtEl.textContent = c[1];
+        hintEl.textContent = 'tap to reveal answer';
+      }
+    });
+
+    document.getElementById('btnGot').addEventListener('click', function(){
+      mastered[idx] = true; storeSet('msb_mastered', mastered); updateGlobalProgress();
+      order.splice(pos % order.length, 1);
+      if(order.length) render(); else render();
+    });
+    document.getElementById('btnAgain').addEventListener('click', function(){
+      pos++;
+      render();
+    });
+  }
+
+  document.getElementById('quizFab').addEventListener('click', openQuiz);
+  document.getElementById('startQuizInline').addEventListener('click', openQuiz);
+  document.getElementById('closeQuiz').addEventListener('click', closeQuiz);
+})();
+</script>
