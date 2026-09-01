@@ -8,10 +8,8 @@ Content is distilled from [awesome-mobile-system-design](https://github.com/yoge
 
 ## How to use it
 
-No build step, no server, no GitHub Pages needed — it's one self-contained `index.html` file.
-
-- **Easiest:** grab `index.html` from the [latest release](../../releases/latest) and double-click it — it opens straight in your default browser.
-- **Or:** clone this repo and open [`index.html`](index.html) directly.
+- **Live, no download:** [open the hosted version](https://claude.ai/code/artifact/1be1b326-6f04-4430-82d0-9ad6eb44e07f).
+- **Or run it yourself:** clone this repo and open [`index.html`](index.html) directly in a browser — it's one self-contained file, no build step or server needed.
 
 Your progress (sheets visited, flashcards mastered) is saved locally in your browser via `localStorage` — it stays on your machine and isn't sent anywhere.
 
